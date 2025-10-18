@@ -1,0 +1,28 @@
+{
+    "entryFile": "src/index.ts",
+    "noImplicitAdditionalProperties": "throw-on-extras",
+    "controllerPathGlobs": [
+        "src/controllers/*Controller.ts"
+    ],
+    "spec": {
+        "outputDirectory": "swagger",
+        "specVersion": 3,
+        "title": "QUIZZZ API Documentation",
+        "version": "1.0.0",
+        "description": "A description of QUIZZZ API",
+        "basePath": "/api",
+        "securityDefinitions": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Paste the JWT access token obtained from /auth/login"
+            }
+        }
+    },
+    "routes": {
+        "basePath": "/api",
+        "routesDir": "src/routes",
+        "authenticationModule": "./src/authentication.ts"
+    }
+}

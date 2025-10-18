@@ -1,0 +1,158 @@
+// =======================================================
+//  PRISMA SCHEMA - MODEL AGENCY MANAGEMENT SYSTEM
+//  Version: Stable, Clean, Healthy (No 18+ Services)
+// =======================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"       // or "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =================== USER ==========================
+model User {
+  id         Int       @id @default(autoincrement())
+  username   String    @unique
+  password   String?
+  avatar     String?
+  rank       String    @default("Bronze")  // Bronze | Silver | Gold | Diamond
+  reputation Float     @default(0)        // Uy tín người dùng
+
+  comments   Comment[]
+  reviews    Review[]
+
+  createdAt  DateTime  @default(now())
+}
+
+// =================== MANAGER ==========================
+model Manager {
+  id         Int       @id @default(autoincrement())
+  name       String
+  contact    String?
+  reputation Float     @default(0)        // Uy tín manager
+
+  models     ModelProfile[]
+
+  createdAt  DateTime  @default(now())
+}
+
+// =================== SERVICE (PG, Livestream, Catwalk...) ==========================
+model Service {
+  id      Int    @id @default(autoincrement())
+  name    String
+  models  ModelService[]
+}
+
+// Pivot table for many-to-many between Model & Service
+model ModelService {
+  id         Int @id @default(autoincrement())
+  modelId    Int
+  serviceId  Int
+  ModelProfile ModelProfile @relation(fields: [modelId], references: [id])
+  Service    Service       @relation(fields: [serviceId], references: [id])
+}
+
+model ModelProfile {
+  id               Int       @id @default(autoincrement())
+  name             String
+  slug             String?   @unique
+  managerId        Int?
+  reputationScore  Float     @default(0)
+
+  price            String?   
+  phoneCurrent     String?
+  workplaceCurrent String?
+  birthYear        Int?
+  height           Int?
+  weight           Int?
+
+  // 🔥 Measurements (lưu cả string + chi tiết để lọc)
+  measurements     String?
+  bust             Int?      // v1
+  waist            Int?      // v2
+  hip              Int?      // v3
+
+  // 🔥 Services 
+  servicesText     String?   // "Chụp ảnh, Livestream..."
+  services         ModelService[]
+
+  origin           String?
+  region           String?
+  address          String?
+
+  portfolio        ModelImage[]
+  phoneHistory     PhoneHistory[]
+  workplaceHistory WorkplaceHistory[]
+  reviews          Review[]
+  comments         Comment[]
+
+  manager          Manager?        @relation(fields: [managerId], references: [id])
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+
+// =================== MODEL IMAGES (Portfolio) ==========================
+model ModelImage {
+  id           Int @id @default(autoincrement())
+  modelId      Int
+  url          String
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  ModelProfile ModelProfile @relation(fields: [modelId], references: [id])
+}
+
+// =================== HISTORY (Phone & Workplace) ==========================
+model PhoneHistory {
+  id        Int @id @default(autoincrement())
+  modelId   Int
+  oldPhone  String
+  createdAt DateTime @default(now())
+  ModelProfile ModelProfile @relation(fields: [modelId], references: [id])
+}
+
+model WorkplaceHistory {
+  id        Int @id @default(autoincrement())
+  modelId   Int
+  oldPlace  String
+  createdAt DateTime @default(now())
+  ModelProfile ModelProfile @relation(fields: [modelId], references: [id])
+}
+
+// =================== REVIEW (With Images) ==========================
+model Review {
+  id          Int @id @default(autoincrement())
+  profileId   Int
+  userId      Int
+  rating      Int           // 1-5 sao
+  content     String?
+  createdAt   DateTime @default(now())
+
+  images      ReviewImage[]
+  ModelProfile ModelProfile @relation(fields: [profileId], references: [id])
+  User        User @relation(fields: [userId], references: [id])
+}
+
+model ReviewImage {
+  id        Int @id @default(autoincrement())
+  reviewId  Int
+  imageUrl  String
+  createdAt DateTime @default(now())
+  Review    Review @relation(fields: [reviewId], references: [id])
+}
+
+// =================== COMMENT (Forum Chat) ==========================
+model Comment {
+  id          Int @id @default(autoincrement())
+  profileId   Int
+  userId      Int?
+  content     String
+  createdAt   DateTime @default(now())
+
+  ModelProfile ModelProfile @relation(fields: [profileId], references: [id])
+  User        User?        @relation(fields: [userId], references: [id])
+}
