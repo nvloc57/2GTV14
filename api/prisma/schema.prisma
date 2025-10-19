@@ -1,6 +1,7 @@
 // =======================================================
-//  PRISMA SCHEMA - MODEL AGENCY MANAGEMENT SYSTEM
-//  Version: Stable, Clean, Healthy (No 18+ Services)
+// PRISMA SCHEMA — FULL IDENTITY (7 TABLES) + PRODUCT DOMAIN
+// DB: MySQL (đổi provider nếu dùng PostgreSQL)
+// Conventions: DB snake_case, Prisma Model CamelCase
 // =======================================================
 
 generator client {
@@ -8,151 +9,286 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"       // or "postgresql"
+  provider = "mysql" // or "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// =================== USER ==========================
+// ===========================
+// ENUMS
+// ===========================
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+  BANNED
+}
+
+enum ProductStatus {
+  ACTIVE
+  ONLEAVE
+  PENDING
+  DELETED
+  BANNED
+  EXPIRED
+}
+
+// ===========================
+// PART 1 — IDENTITY (7 TABLES)
+// ===========================
+
 model User {
-  id         Int       @id @default(autoincrement())
-  username   String    @unique
-  password   String?
-  avatar     String?
-  rank       String    @default("Bronze")  // Bronze | Silver | Gold | Diamond
-  reputation Float     @default(0)        // Uy tín người dùng
+  // core identity fields
+  id                   String    @id @default(cuid()) @map("id")
+  userName             String?   @map("user_name") @db.VarChar(256)
+  normalizedUserName   String?   @map("normalized_user_name") @db.VarChar(256)
+  email                String?   @map("email") @db.VarChar(256)
+  normalizedEmail      String?   @map("normalized_email") @db.VarChar(256)
+  emailConfirmed       Boolean   @default(false) @map("email_confirmed")
+  passwordHash         String?   @map("password_hash") // Identity v3 PBKDF2
+  securityStamp        String?   @map("security_stamp")
+  concurrencyStamp     String?   @map("concurrency_stamp")
+  phoneNumber          String?   @map("phone_number")
+  phoneNumberConfirmed Boolean   @default(false) @map("phone_number_confirmed")
+  twoFactorEnabled     Boolean   @default(false) @map("two_factor_enabled")
+  lockoutEnd           DateTime? @map("lockout_end")
+  lockoutEnabled       Boolean   @default(false) @map("lockout_enabled")
+  accessFailedCount    Int       @default(0) @map("access_failed_count")
 
-  comments   Comment[]
-  reviews    Review[]
+  // custom profile
+  fullName   String?    @map("full_name")
+  avatarUrl  String?    @map("avatar_url")
+  reputation Float      @default(0) @map("reputation")
+  status     UserStatus @default(ACTIVE) @map("status")
+  // soft delete
+  deletedAt  DateTime?  @map("deleted_at")
 
-  createdAt  DateTime  @default(now())
+  // meta
+  isActive  Boolean   @default(true) @map("is_active")
+  lastLogin DateTime? @map("last_login")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // relations
+  roles  UserRole[]
+  claims UserClaim[]
+  logins UserLogin[]
+  tokens UserToken[]
+
+  reviews  Review[]
+  comments Comment[]
+  Product  Product[]
+
+  @@unique([normalizedUserName], map: "ux_users_normalized_user_name")
+  @@index([normalizedEmail], map: "ix_users_normalized_email")
+  @@map("users")
 }
 
-// =================== MANAGER ==========================
-model Manager {
-  id         Int       @id @default(autoincrement())
-  name       String
-  contact    String?
-  reputation Float     @default(0)        // Uy tín manager
+model Role {
+  id               String  @id @default(cuid()) @map("id")
+  name             String? @map("name") @db.VarChar(256)
+  normalizedName   String? @map("normalized_name") @db.VarChar(256)
+  concurrencyStamp String? @map("concurrency_stamp")
 
-  models     ModelProfile[]
+  users  UserRole[]
+  claims RoleClaim[]
 
-  createdAt  DateTime  @default(now())
+  @@unique([normalizedName], map: "ux_roles_normalized_name")
+  @@map("roles")
 }
 
-// =================== SERVICE (PG, Livestream, Catwalk...) ==========================
-model Service {
-  id      Int    @id @default(autoincrement())
-  name    String
-  models  ModelService[]
+model UserRole {
+  // composite key like Identity
+  userId String @map("user_id")
+  roleId String @map("role_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
 }
 
-// Pivot table for many-to-many between Model & Service
-model ModelService {
-  id         Int @id @default(autoincrement())
-  modelId    Int
-  serviceId  Int
-  ModelProfile ModelProfile @relation(fields: [modelId], references: [id])
-  Service    Service       @relation(fields: [serviceId], references: [id])
+model UserClaim {
+  id         Int     @id @default(autoincrement()) @map("id")
+  userId     String  @map("user_id")
+  claimType  String? @map("claim_type")
+  claimValue String? @map("claim_value")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "ix_user_claims_user_id")
+  @@map("user_claims")
 }
 
-model ModelProfile {
-  id               Int       @id @default(autoincrement())
-  name             String
-  slug             String?   @unique
-  managerId        Int?
-  reputationScore  Float     @default(0)
+model RoleClaim {
+  id         Int     @id @default(autoincrement()) @map("id")
+  roleId     String  @map("role_id")
+  claimType  String? @map("claim_type")
+  claimValue String? @map("claim_value")
 
-  price            String?   
-  phoneCurrent     String?
-  workplaceCurrent String?
-  birthYear        Int?
-  height           Int?
-  weight           Int?
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  // 🔥 Measurements (lưu cả string + chi tiết để lọc)
-  measurements     String?
-  bust             Int?      // v1
-  waist            Int?      // v2
-  hip              Int?      // v3
-
-  // 🔥 Services 
-  servicesText     String?   // "Chụp ảnh, Livestream..."
-  services         ModelService[]
-
-  origin           String?
-  region           String?
-  address          String?
-
-  portfolio        ModelImage[]
-  phoneHistory     PhoneHistory[]
-  workplaceHistory WorkplaceHistory[]
-  reviews          Review[]
-  comments         Comment[]
-
-  manager          Manager?        @relation(fields: [managerId], references: [id])
-
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  @@index([roleId], map: "ix_role_claims_role_id")
+  @@map("role_claims")
 }
 
+model UserLogin {
+  loginProvider       String  @map("login_provider")
+  providerKey         String  @map("provider_key")
+  providerDisplayName String? @map("provider_display_name")
+  userId              String  @map("user_id")
 
-// =================== MODEL IMAGES (Portfolio) ==========================
-model ModelImage {
-  id           Int @id @default(autoincrement())
-  modelId      Int
-  url          String
-  isPrimary    Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  ModelProfile ModelProfile @relation(fields: [modelId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([loginProvider, providerKey])
+  @@index([userId], map: "ix_user_logins_user_id")
+  @@map("user_logins")
 }
 
-// =================== HISTORY (Phone & Workplace) ==========================
-model PhoneHistory {
-  id        Int @id @default(autoincrement())
-  modelId   Int
-  oldPhone  String
-  createdAt DateTime @default(now())
-  ModelProfile ModelProfile @relation(fields: [modelId], references: [id])
+model UserToken {
+  userId        String  @map("user_id")
+  loginProvider String  @map("login_provider")
+  name          String  @map("name")
+  value         String? @map("value")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, loginProvider, name])
+  @@map("user_tokens")
 }
 
-model WorkplaceHistory {
-  id        Int @id @default(autoincrement())
-  modelId   Int
-  oldPlace  String
-  createdAt DateTime @default(now())
-  ModelProfile ModelProfile @relation(fields: [modelId], references: [id])
+// ===========================
+// PART 2 — PRODUCT DOMAIN
+// ===========================
+
+model Product {
+  id       Int     @id @default(autoincrement()) @map("id")
+  name     String  @map("name")
+  cverUrl String  @map("cver_url")
+  cliUrl String  @map("cli_url")
+  slug     String? @unique @map("slug")
+
+  currentContact String? @map("current_contact")
+  oldContact     String? @map("old_contact")
+
+  dId    String? @map("dId")
+  cId    String? @map("cId")
+  addr    String? @map("addr")
+  oldAddr String? @map("old_addr")
+
+  originZone   OriginZone? @map("origin_zone")
+  openForBooking String?     @map("openForBooking")
+
+  ver123 String? @map("ver123")
+  ver1   Int?    @map("ver1")
+  ver2   Int?    @map("ver2")
+  ver3   Int?    @map("ver3")
+
+  tagsText String?      @map("tags_text")
+  tags     ProductTag[]
+
+  price           String? @map("price")
+  reputationScore Float   @default(0) @map("reputation_score")
+
+  status       ProductStatus  @default(ACTIVE) @map("status")
+  deletedAt    DateTime?      @map("deleted_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  userId       String?
+  ProductImage ProductImage[]
+  Review       Review[]
+  Comment      Comment[]
+  User         User?          @relation(fields: [userId], references: [id])
+
+  @@map("products")
 }
 
-// =================== REVIEW (With Images) ==========================
+enum OriginZone {
+  NORTH
+  CENTRAL
+  SOUTH
+  MEKONG
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement()) @map("id")
+  name String @unique @map("name")
+
+  products ProductTag[]
+
+  @@map("tags")
+}
+
+// pivot Product ↔ Tag
+model ProductTag {
+  id        Int @id @default(autoincrement()) @map("id")
+  productId Int @map("product_id")
+  tagId     Int @map("tag_id")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, tagId], map: "ux_product_tags_product_tag")
+  @@index([tagId], map: "ix_product_tags_tag_id")
+  @@map("product_tags")
+}
+
+// product images (portfolio)
+model ProductImage {
+  id        Int      @id @default(autoincrement()) @map("id")
+  productId Int      @map("product_id")
+  url       String   @map("url")
+  isPrimary Boolean  @default(false) @map("is_primary")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId], map: "ix_product_images_product_id")
+  @@map("product_images")
+}
+
+// reviews with soft delete
 model Review {
-  id          Int @id @default(autoincrement())
-  profileId   Int
-  userId      Int
-  rating      Int           // 1-5 sao
-  content     String?
-  createdAt   DateTime @default(now())
+  id        Int       @id @default(autoincrement()) @map("id")
+  productId Int       @map("product_id")
+  userId    String    @map("user_id")
+  rating    Int       @map("rating") // 1..5
+  content   String?   @map("content")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
-  images      ReviewImage[]
-  ModelProfile ModelProfile @relation(fields: [profileId], references: [id])
-  User        User @relation(fields: [userId], references: [id])
+  product Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images  ReviewImage[]
+
+  @@index([productId], map: "ix_reviews_product_id")
+  @@index([userId], map: "ix_reviews_user_id")
+  @@map("reviews")
 }
 
 model ReviewImage {
-  id        Int @id @default(autoincrement())
-  reviewId  Int
-  imageUrl  String
-  createdAt DateTime @default(now())
-  Review    Review @relation(fields: [reviewId], references: [id])
+  id        Int      @id @default(autoincrement()) @map("id")
+  reviewId  Int      @map("review_id")
+  imageUrl  String   @map("image_url")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId], map: "ix_review_images_review_id")
+  @@map("review_images")
 }
 
-// =================== COMMENT (Forum Chat) ==========================
 model Comment {
-  id          Int @id @default(autoincrement())
-  profileId   Int
-  userId      Int?
-  content     String
-  createdAt   DateTime @default(now())
+  id        Int      @id @default(autoincrement()) @map("id")
+  productId Int      @map("product_id")
+  userId    String?  @map("user_id")
+  content   String   @map("content")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  ModelProfile ModelProfile @relation(fields: [profileId], references: [id])
-  User        User?        @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([productId], map: "ix_comments_product_id")
+  @@index([userId], map: "ix_comments_user_id")
+  @@map("comments")
 }

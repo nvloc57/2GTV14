@@ -7,159 +7,66 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"_36_Enums.UserRole": {
+			"_36_Enums.ProductStatus": {
 				"type": "string",
 				"enum": [
-					"TEACHER",
-					"STUDENT",
-					"ADMIN"
+					"ACTIVE",
+					"ONLEAVE",
+					"PENDING",
+					"DELETED",
+					"BANNED",
+					"EXPIRED"
 				]
 			},
-			"UserRole": {
-				"$ref": "#/components/schemas/_36_Enums.UserRole"
+			"ProductStatus": {
+				"$ref": "#/components/schemas/_36_Enums.ProductStatus"
 			},
-			"UserResponse": {
+			"_36_Enums.OriginZone": {
+				"type": "string",
+				"enum": [
+					"NORTH",
+					"CENTRAL",
+					"SOUTH",
+					"MEKONG"
+				]
+			},
+			"OriginZone": {
+				"$ref": "#/components/schemas/_36_Enums.OriginZone"
+			},
+			"ProductListItem": {
 				"properties": {
-					"updatedAt": {
+					"userId": {
 						"type": "string",
-						"format": "date-time"
+						"nullable": true
 					},
 					"createdAt": {
 						"type": "string",
 						"format": "date-time"
 					},
-					"lastLogin": {
-						"type": "string",
-						"format": "date-time",
+					"reputationScore": {
+						"type": "number",
+						"format": "double"
+					},
+					"originZone": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/OriginZone"
+							}
+						],
 						"nullable": true
-					},
-					"isActive": {
-						"type": "boolean"
-					},
-					"role": {
-						"$ref": "#/components/schemas/UserRole"
-					},
-					"avatarUrl": {
-						"type": "string",
-						"nullable": true
-					},
-					"fullName": {
-						"type": "string",
-						"nullable": true
-					},
-					"email": {
-						"type": "string",
-						"nullable": true
-					},
-					"username": {
-						"type": "string"
-					},
-					"id": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"updatedAt",
-					"createdAt",
-					"lastLogin",
-					"isActive",
-					"role",
-					"avatarUrl",
-					"fullName",
-					"email",
-					"username",
-					"id"
-				],
-				"type": "object"
-			},
-			"SubmissionSummary": {
-				"properties": {
-					"quizId": {
-						"type": "number",
-						"format": "double"
-					},
-					"studentId": {
-						"type": "number",
-						"format": "double"
-					},
-					"endTime": {
-						"type": "string",
-						"format": "date-time",
-						"nullable": true
-					},
-					"startTime": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"score": {
-						"type": "number",
-						"format": "double"
-					},
-					"id": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"quizId",
-					"studentId",
-					"endTime",
-					"startTime",
-					"score",
-					"id"
-				],
-				"type": "object"
-			},
-			"SubmissionAnswerSummary": {
-				"properties": {
-					"selectedAnswerId": {
-						"type": "number",
-						"format": "double"
-					},
-					"questionId": {
-						"type": "number",
-						"format": "double"
-					},
-					"submissionId": {
-						"type": "number",
-						"format": "double"
-					},
-					"id": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"selectedAnswerId",
-					"questionId",
-					"submissionId",
-					"id"
-				],
-				"type": "object"
-			},
-			"QuizSummary": {
-				"properties": {
-					"updatedAt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"teacherId": {
-						"type": "number",
-						"format": "double"
 					},
 					"status": {
-						"type": "string"
+						"$ref": "#/components/schemas/ProductStatus"
 					},
-					"description": {
+					"price": {
 						"type": "string",
 						"nullable": true
 					},
-					"title": {
+					"slug": {
+						"type": "string",
+						"nullable": true
+					},
+					"name": {
 						"type": "string"
 					},
 					"id": {
@@ -168,134 +75,207 @@
 					}
 				},
 				"required": [
-					"updatedAt",
+					"userId",
 					"createdAt",
-					"teacherId",
+					"reputationScore",
+					"originZone",
 					"status",
-					"description",
-					"title",
+					"price",
+					"slug",
+					"name",
 					"id"
 				],
 				"type": "object"
 			},
-			"_36_Enums.QuizStatus": {
-				"type": "string",
-				"enum": [
-					"DRAFT",
-					"PUBLISHED",
-					"ARCHIVED"
-				]
-			},
-			"QuizStatus": {
-				"$ref": "#/components/schemas/_36_Enums.QuizStatus"
-			},
-			"AddQuizRequest": {
-				"properties": {
-					"title": {
-						"type": "string",
-						"example": "Midterm Quiz"
+			"ProductDetail": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/ProductListItem"
 					},
-					"description": {
-						"type": "string",
-						"nullable": true,
-						"example": "Covers chapters 1–3"
-					},
-					"status": {
-						"$ref": "#/components/schemas/QuizStatus",
-						"example": "DRAFT"
-					},
-					"timeLimitMinutes": {
-						"type": "number",
-						"format": "double",
-						"example": 30
-					}
-				},
-				"required": [
-					"title",
-					"description",
-					"status",
-					"timeLimitMinutes"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"LoginSuccessResponse": {
-				"properties": {
-					"user": {
+					{
 						"properties": {
-							"avatarUrl": {
+							"tags": {
+								"items": {
+									"properties": {
+										"name": {
+											"type": "string"
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"name",
+										"id"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							},
+							"images": {
+								"items": {
+									"properties": {
+										"isPrimary": {
+											"type": "boolean"
+										},
+										"url": {
+											"type": "string"
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"isPrimary",
+										"url",
+										"id"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							},
+							"tagsText": {
 								"type": "string",
 								"nullable": true
 							},
-							"role": {
-								"type": "string"
-							},
-							"email": {
-								"type": "string"
-							},
-							"fullName": {
-								"type": "string"
-							},
-							"username": {
-								"type": "string"
-							},
-							"id": {
+							"ver3": {
 								"type": "number",
-								"format": "double"
+								"format": "double",
+								"nullable": true
+							},
+							"ver2": {
+								"type": "number",
+								"format": "double",
+								"nullable": true
+							},
+							"ver1": {
+								"type": "number",
+								"format": "double",
+								"nullable": true
+							},
+							"ver123": {
+								"type": "string",
+								"nullable": true
+							},
+							"oldAddr": {
+								"type": "string",
+								"nullable": true
+							},
+							"addr": {
+								"type": "string",
+								"nullable": true
+							},
+							"cId": {
+								"type": "string",
+								"nullable": true
+							},
+							"dId": {
+								"type": "string",
+								"nullable": true
+							},
+							"oldContact": {
+								"type": "string",
+								"nullable": true
+							},
+							"currentContact": {
+								"type": "string",
+								"nullable": true
+							},
+							"cliUrl": {
+								"type": "string"
+							},
+							"cverUrl": {
+								"type": "string"
 							}
 						},
 						"required": [
-							"avatarUrl",
-							"role",
-							"email",
-							"fullName",
-							"username",
-							"id"
+							"tags",
+							"images",
+							"tagsText",
+							"ver3",
+							"ver2",
+							"ver1",
+							"ver123",
+							"oldAddr",
+							"addr",
+							"cId",
+							"dId",
+							"oldContact",
+							"currentContact",
+							"cliUrl",
+							"cverUrl"
 						],
 						"type": "object"
-					},
-					"refreshToken": {
-						"type": "string"
-					},
-					"accessToken": {
-						"type": "string"
 					}
-				},
-				"required": [
-					"user",
-					"refreshToken",
-					"accessToken"
-				],
-				"type": "object"
+				]
 			},
-			"LoginErrorResponse": {
+			"Partial__name-string--cverUrl-string--cliUrl-string--slug-string-or-null--price-string-or-null--status-ProductStatus--originZone-OriginZone-or-null--userId-string-or-null--tagsText-string-or-null--currentContact-string-or-null--oldContact-string-or-null--dId-string-or-null--cId-string-or-null--addr-string-or-null--oldAddr-string-or-null--ver123-string-or-null--ver1-number-or-null--ver2-number-or-null--ver3-number-or-null__": {
 				"properties": {
-					"message": {
+					"name": {
 						"type": "string"
-					}
-				},
-				"required": [
-					"message"
-				],
-				"type": "object"
-			},
-			"LoginRequest": {
-				"properties": {
-					"username": {
-						"type": "string",
-						"example": "teacher1"
 					},
-					"password": {
-						"type": "string",
-						"example": "123456"
+					"cverUrl": {
+						"type": "string"
+					},
+					"cliUrl": {
+						"type": "string"
+					},
+					"slug": {
+						"type": "string"
+					},
+					"price": {
+						"type": "string"
+					},
+					"status": {
+						"$ref": "#/components/schemas/_36_Enums.ProductStatus"
+					},
+					"originZone": {
+						"$ref": "#/components/schemas/_36_Enums.OriginZone"
+					},
+					"userId": {
+						"type": "string"
+					},
+					"tagsText": {
+						"type": "string"
+					},
+					"currentContact": {
+						"type": "string"
+					},
+					"oldContact": {
+						"type": "string"
+					},
+					"dId": {
+						"type": "string"
+					},
+					"cId": {
+						"type": "string"
+					},
+					"addr": {
+						"type": "string"
+					},
+					"oldAddr": {
+						"type": "string"
+					},
+					"ver123": {
+						"type": "string"
+					},
+					"ver1": {
+						"type": "number",
+						"format": "double"
+					},
+					"ver2": {
+						"type": "number",
+						"format": "double"
+					},
+					"ver3": {
+						"type": "number",
+						"format": "double"
 					}
 				},
-				"required": [
-					"username",
-					"password"
-				],
 				"type": "object",
-				"additionalProperties": false
+				"description": "Make all properties in T optional"
 			}
 		},
 		"securitySchemes": {
@@ -317,9 +297,9 @@
 		"contact": {}
 	},
 	"paths": {
-		"/users": {
+		"/products": {
 			"get": {
-				"operationId": "GetUsers",
+				"operationId": "ListProducts",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -327,29 +307,15 @@
 							"application/json": {
 								"schema": {
 									"items": {
-										"$ref": "#/components/schemas/UserResponse"
+										"$ref": "#/components/schemas/ProductListItem"
 									},
 									"type": "array"
 								}
 							}
 						}
 					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
+					"400": {
+						"description": "Bad Request",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -364,50 +330,10 @@
 					}
 				},
 				"tags": [
-					"User"
+					"Product"
 				],
-				"security": [
-					{
-						"bearerAuth": [
-							"ADMIN"
-						]
-					}
-				],
+				"security": [],
 				"parameters": [
-					{
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "pageSize",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "role",
-						"required": false,
-						"schema": {
-							"$ref": "#/components/schemas/UserRole"
-						}
-					},
-					{
-						"in": "query",
-						"name": "isActive",
-						"required": false,
-						"schema": {
-							"type": "boolean"
-						}
-					},
 					{
 						"in": "query",
 						"name": "search",
@@ -415,1006 +341,56 @@
 						"schema": {
 							"type": "string"
 						}
-					}
-				]
-			},
-			"post": {
-				"operationId": "CreateUser",
-				"responses": {
-					"201": {
-						"description": "User created",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"user": {
-											"$ref": "#/components/schemas/UserResponse"
-										},
-										"message": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"user",
-										"message"
-									],
-									"type": "object"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"User"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"email": {
-										"type": "string"
-									},
-									"passwordHash": {
-										"type": "string"
-									},
-									"fullName": {
-										"type": "string"
-									},
-									"username": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"email",
-									"passwordHash",
-									"fullName",
-									"username"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/users/{id}": {
-			"get": {
-				"operationId": "GetUserById",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/UserResponse"
-										}
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "User not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"User"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			},
-			"put": {
-				"operationId": "UpdateUser",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"user": {
-											"$ref": "#/components/schemas/UserResponse"
-										},
-										"message": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"user",
-										"message"
-									],
-									"type": "object",
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "User not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"User"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"isActive": {
-										"type": "boolean"
-									},
-									"role": {
-										"$ref": "#/components/schemas/UserRole"
-									},
-									"avatarUrl": {
-										"type": "string",
-										"nullable": true
-									},
-									"passwordHash": {
-										"type": "string"
-									},
-									"email": {
-										"type": "string",
-										"nullable": true
-									},
-									"fullName": {
-										"type": "string",
-										"nullable": true
-									},
-									"username": {
-										"type": "string"
-									}
-								},
-								"type": "object"
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"operationId": "DeleteUser",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"id": {
-											"type": "number",
-											"format": "double"
-										},
-										"message": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"id",
-										"message"
-									],
-									"type": "object",
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "User not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"User"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			}
-		},
-		"/submissions": {
-			"get": {
-				"operationId": "ListSubmissions",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/SubmissionSummary"
-									},
-									"type": "array"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Submission"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "quizId",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "pageSize",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			},
-			"post": {
-				"operationId": "CreateSubmission",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/SubmissionSummary"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Submission"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"STUDENT"
-						]
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"answers": {
-										"items": {
-											"properties": {
-												"selectedAnswerId": {
-													"type": "number",
-													"format": "double"
-												},
-												"questionId": {
-													"type": "number",
-													"format": "double"
-												}
-											},
-											"required": [
-												"selectedAnswerId",
-												"questionId"
-											],
-											"type": "object"
-										},
-										"type": "array"
-									},
-									"quizId": {
-										"type": "number",
-										"format": "double"
-									}
-								},
-								"required": [
-									"answers",
-									"quizId"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/submissions/{id}": {
-			"get": {
-				"operationId": "GetSubmissionById",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/SubmissionSummary"
-										}
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Submission not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Submission"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			},
-			"delete": {
-				"operationId": "DeleteSubmission",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"id": {
-											"type": "number",
-											"format": "double"
-										},
-										"message": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"id",
-										"message"
-									],
-									"type": "object",
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Submission not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Submission"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"TEACHER",
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			}
-		},
-		"/submission-answers": {
-			"get": {
-				"operationId": "ListBySubmission",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/SubmissionAnswerSummary"
-									},
-									"type": "array"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"SubmissionAnswer"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "submissionId",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			}
-		},
-		"/submission-answers/{id}": {
-			"get": {
-				"operationId": "GetById",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/SubmissionAnswerSummary"
-										}
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"SubmissionAnswer"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			}
-		},
-		"/": {
-			"get": {
-				"operationId": "WelcomeMessage",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "string"
-								}
-							}
-						}
-					}
-				},
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/quizzes": {
-			"get": {
-				"operationId": "List",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/QuizSummary"
-									},
-									"type": "array"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Quizzes"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "pageSize",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
 					},
 					{
 						"in": "query",
 						"name": "status",
 						"required": false,
 						"schema": {
-							"$ref": "#/components/schemas/QuizStatus"
+							"$ref": "#/components/schemas/ProductStatus"
 						}
 					},
 					{
 						"in": "query",
-						"name": "teacherId",
+						"name": "originZone",
 						"required": false,
 						"schema": {
+							"$ref": "#/components/schemas/OriginZone"
+						}
+					},
+					{
+						"in": "query",
+						"name": "userId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "tagId",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"default": 20,
 							"format": "double",
 							"type": "number"
 						}
@@ -1422,14 +398,14 @@
 				]
 			},
 			"post": {
-				"operationId": "Create",
+				"operationId": "CreateProduct",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/QuizSummary"
+									"$ref": "#/components/schemas/ProductListItem"
 								}
 							}
 						}
@@ -1478,12 +454,13 @@
 					}
 				},
 				"tags": [
-					"Quizzes"
+					"Product"
 				],
 				"security": [
 					{
 						"bearerAuth": [
-							"TEACHER"
+							"ADMIN",
+							"SELLER"
 						]
 					}
 				],
@@ -1493,504 +470,91 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/AddQuizRequest"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/quizzes/{id}": {
-			"get": {
-				"operationId": "Get",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/QuizSummary"
-										}
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Quiz not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Quizzes"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			},
-			"put": {
-				"operationId": "Update",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/QuizSummary"
-										}
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Quiz not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Quizzes"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"TEACHER",
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
 								"properties": {
-									"timeLimitMinutes": {
+									"ver3": {
 										"type": "number",
-										"format": "double"
+										"format": "double",
+										"nullable": true
+									},
+									"ver2": {
+										"type": "number",
+										"format": "double",
+										"nullable": true
+									},
+									"ver1": {
+										"type": "number",
+										"format": "double",
+										"nullable": true
+									},
+									"ver123": {
+										"type": "string",
+										"nullable": true
+									},
+									"oldAddr": {
+										"type": "string",
+										"nullable": true
+									},
+									"addr": {
+										"type": "string",
+										"nullable": true
+									},
+									"cId": {
+										"type": "string",
+										"nullable": true
+									},
+									"dId": {
+										"type": "string",
+										"nullable": true
+									},
+									"oldContact": {
+										"type": "string",
+										"nullable": true
+									},
+									"currentContact": {
+										"type": "string",
+										"nullable": true
+									},
+									"tagsText": {
+										"type": "string",
+										"nullable": true
+									},
+									"userId": {
+										"type": "string",
+										"nullable": true
+									},
+									"originZone": {
+										"allOf": [
+											{
+												"$ref": "#/components/schemas/OriginZone"
+											}
+										],
+										"nullable": true
 									},
 									"status": {
-										"$ref": "#/components/schemas/QuizStatus"
+										"$ref": "#/components/schemas/ProductStatus"
 									},
-									"description": {
+									"price": {
 										"type": "string",
 										"nullable": true
 									},
-									"title": {
-										"type": "string"
-									}
-								},
-								"type": "object"
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"operationId": "Remove",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"id": {
-											"type": "number",
-											"format": "double"
-										},
-										"message": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"id",
-										"message"
-									],
-									"type": "object",
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Quiz not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Quizzes"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"TEACHER",
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			}
-		},
-		"/questions": {
-			"get": {
-				"operationId": "ListQuestions",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"properties": {
-											"quizId": {
-												"type": "number",
-												"format": "double"
-											},
-											"explanation": {
-												"type": "string",
-												"nullable": true
-											},
-											"questionText": {
-												"type": "string"
-											},
-											"id": {
-												"type": "number",
-												"format": "double"
-											}
-										},
-										"required": [
-											"quizId",
-											"explanation",
-											"questionText",
-											"id"
-										],
-										"type": "object"
-									},
-									"type": "array"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Question"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "quizId",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "pageSize",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			},
-			"post": {
-				"operationId": "CreateQuestion",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"quizId": {
-											"type": "number",
-											"format": "double"
-										},
-										"explanation": {
-											"type": "string",
-											"nullable": true
-										},
-										"questionText": {
-											"type": "string"
-										},
-										"id": {
-											"type": "number",
-											"format": "double"
-										}
-									},
-									"required": [
-										"quizId",
-										"explanation",
-										"questionText",
-										"id"
-									],
-									"type": "object"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Question"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"TEACHER",
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"explanation": {
+									"slug": {
 										"type": "string",
 										"nullable": true
 									},
-									"questionText": {
+									"cliUrl": {
 										"type": "string"
 									},
-									"quizId": {
-										"type": "number",
-										"format": "double"
+									"cverUrl": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
 									}
 								},
 								"required": [
-									"questionText",
-									"quizId"
+									"cliUrl",
+									"cverUrl",
+									"name"
 								],
 								"type": "object"
 							}
@@ -1999,659 +563,44 @@
 				}
 			}
 		},
-		"/questions/{id}": {
+		"/products/{id}": {
 			"get": {
-				"operationId": "GetQuestionById",
+				"operationId": "GetProduct",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"quizId": {
-											"type": "number",
-											"format": "double"
-										},
-										"explanation": {
-											"type": "string"
-										},
-										"questionText": {
-											"type": "string"
-										},
-										"id": {
-											"type": "number",
-											"format": "double"
-										}
-									},
-									"required": [
-										"quizId",
-										"explanation",
-										"questionText",
-										"id"
-									],
-									"type": "object",
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Question not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Question"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			},
-			"put": {
-				"operationId": "UpdateQuestion",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"quizId": {
-											"type": "number",
-											"format": "double"
-										},
-										"explanation": {
-											"type": "string",
-											"nullable": true
-										},
-										"questionText": {
-											"type": "string"
-										},
-										"id": {
-											"type": "number",
-											"format": "double"
-										}
-									},
-									"required": [
-										"quizId",
-										"explanation",
-										"questionText",
-										"id"
-									],
-									"type": "object",
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Question not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Question"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"TEACHER",
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"explanation": {
-										"type": "string",
-										"nullable": true
-									},
-									"questionText": {
-										"type": "string"
-									}
-								},
-								"type": "object"
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"operationId": "DeleteQuestion",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"id": {
-											"type": "number",
-											"format": "double"
-										},
-										"message": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"id",
-										"message"
-									],
-									"type": "object",
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Question not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Question"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"TEACHER",
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			}
-		},
-		"/auth/login": {
-			"post": {
-				"operationId": "Login",
-				"responses": {
-					"200": {
-						"description": "Login successful",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
+									"allOf": [
 										{
-											"$ref": "#/components/schemas/LoginSuccessResponse"
-										},
-										{
-											"$ref": "#/components/schemas/LoginErrorResponse"
+											"$ref": "#/components/schemas/ProductDetail"
 										}
-									]
+									],
+									"nullable": true
 								}
 							}
 						}
 					},
-					"400": {
-						"description": "Bad Request",
+					"404": {
+						"description": "Product not found",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/LoginErrorResponse"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Invalid credentials",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/LoginErrorResponse"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/LoginErrorResponse"
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Auth"
+					"Product"
 				],
 				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/LoginRequest"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/answers": {
-			"get": {
-				"operationId": "ListAnswers",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"properties": {
-											"questionId": {
-												"type": "number",
-												"format": "double"
-											},
-											"isCorrect": {
-												"type": "boolean"
-											},
-											"answerText": {
-												"type": "string"
-											},
-											"id": {
-												"type": "number",
-												"format": "double"
-											}
-										},
-										"required": [
-											"questionId",
-											"answerText",
-											"id"
-										],
-										"type": "object"
-									},
-									"type": "array"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Answer"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "questionId",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "pageSize",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			},
-			"post": {
-				"operationId": "CreateAnswer",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"questionId": {
-											"type": "number",
-											"format": "double"
-										},
-										"isCorrect": {
-											"type": "boolean"
-										},
-										"answerText": {
-											"type": "string"
-										},
-										"id": {
-											"type": "number",
-											"format": "double"
-										}
-									},
-									"required": [
-										"questionId",
-										"isCorrect",
-										"answerText",
-										"id"
-									],
-									"type": "object"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Forbidden",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Answer"
-				],
-				"security": [
-					{
-						"bearerAuth": [
-							"TEACHER",
-							"ADMIN"
-						]
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"isCorrect": {
-										"type": "boolean"
-									},
-									"answerText": {
-										"type": "string"
-									},
-									"questionId": {
-										"type": "number",
-										"format": "double"
-									}
-								},
-								"required": [
-									"answerText",
-									"questionId"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/answers/{id}": {
-			"get": {
-				"operationId": "GetAnswerById",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"questionId": {
-											"type": "number",
-											"format": "double"
-										},
-										"isCorrect": {
-											"type": "boolean"
-										},
-										"answerText": {
-											"type": "string"
-										},
-										"id": {
-											"type": "number",
-											"format": "double"
-										}
-									},
-									"required": [
-										"questionId",
-										"answerText",
-										"id"
-									],
-									"type": "object",
-									"nullable": true
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Unauthorized",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Answer not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"enum": [
-										null
-									],
-									"nullable": true
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Answer"
-				],
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
 				"parameters": [
 					{
 						"in": "path",
@@ -2665,36 +614,18 @@
 				]
 			},
 			"put": {
-				"operationId": "UpdateAnswer",
+				"operationId": "UpdateProduct",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"questionId": {
-											"type": "number",
-											"format": "double"
-										},
-										"isCorrect": {
-											"type": "boolean"
-										},
-										"answerText": {
-											"type": "string"
-										},
-										"id": {
-											"type": "number",
-											"format": "double"
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/ProductListItem"
 										}
-									},
-									"required": [
-										"questionId",
-										"isCorrect",
-										"answerText",
-										"id"
 									],
-									"type": "object",
 									"nullable": true
 								}
 							}
@@ -2729,7 +660,7 @@
 						}
 					},
 					"404": {
-						"description": "Answer not found",
+						"description": "Product not found",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -2744,13 +675,13 @@
 					}
 				},
 				"tags": [
-					"Answer"
+					"Product"
 				],
 				"security": [
 					{
 						"bearerAuth": [
-							"TEACHER",
-							"ADMIN"
+							"ADMIN",
+							"SELLER"
 						]
 					}
 				],
@@ -2770,22 +701,14 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"isCorrect": {
-										"type": "boolean"
-									},
-									"answerText": {
-										"type": "string"
-									}
-								},
-								"type": "object"
+								"$ref": "#/components/schemas/Partial__name-string--cverUrl-string--cliUrl-string--slug-string-or-null--price-string-or-null--status-ProductStatus--originZone-OriginZone-or-null--userId-string-or-null--tagsText-string-or-null--currentContact-string-or-null--oldContact-string-or-null--dId-string-or-null--cId-string-or-null--addr-string-or-null--oldAddr-string-or-null--ver123-string-or-null--ver1-number-or-null--ver2-number-or-null--ver3-number-or-null__"
 							}
 						}
 					}
 				}
 			},
 			"delete": {
-				"operationId": "DeleteAnswer",
+				"operationId": "DeleteProduct",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -2840,7 +763,7 @@
 						}
 					},
 					"404": {
-						"description": "Answer not found",
+						"description": "Product not found",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -2855,12 +778,11 @@
 					}
 				},
 				"tags": [
-					"Answer"
+					"Product"
 				],
 				"security": [
 					{
 						"bearerAuth": [
-							"TEACHER",
 							"ADMIN"
 						]
 					}
